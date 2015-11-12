@@ -54,6 +54,10 @@ conn_dw.setasdefault()
 for t in tables_names:
     conn_dw.execute("TRUNCATE TABLE "+t+" CASCADE;")
 
+
+# ROW EXPANDERS
+
+
 # DIMENSIONS
 
 dim_room = Dimension(
@@ -91,6 +95,12 @@ fact_sale = FactTable(
 )
 
 # PROGRAM
+
+
+def TimeGenerator():
+    raise "meh"
+
+# LOAD DATA
 
 [dim_room.insert(row) for row in src_room]
 
