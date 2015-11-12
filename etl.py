@@ -16,7 +16,7 @@ from pygrametl.tables import Dimension, FactTable
 db_dw = 'fklubdw'
 db_rw = 'fkluboltp'
 csv_dir = 'fklubdw/FKlubSourceData/'
-tables_names = []
+tables_names = ['member', 'time', 'product', 'room', 'sale']
 
 username = getpass.getuser()
 print ('user='+username)
@@ -49,8 +49,10 @@ conn_dw = pygrametl.ConnectionWrapper(pgconn_dw)
 conn_dw.setasdefault()
 # conn_dw.execute('set search_path to pygrametlexa')
 
-for t in conn_dw.fetchalltuples():
-    print(t)
+# TRUNCATE
+
+for t in tables_names:
+    conn_dw.execute("TRUNCATE TABLE "+t+" CASCADE;")
 
 # DIMENSIONS
 
@@ -60,30 +62,37 @@ dim_room = Dimension(
     attributes=['name', 'description']
 )
 
-for row in src_room:
-    print(row)
-    dim_room.insert(row)
-
-"""
 dim_member = Dimension(
     name='member',
     key='member_id',
     attributes=['is_active', 'year', 'balance']
 )
-"""
+
+dim_product = Dimension(
+    name='product',
+    key='product_id',
+    attributes=['name', 'price', 'is_active', 'deactivation_date']  # 'type'
+)
+
+dim_time = Dimension(
+    name='time',
+    key='time_id',
+    attributes=['semester', 'week', 'day', 'hour', 'quarter_hour', 'year',
+                'is_spring', 'is_weekend', 'is_morning', 'is_afternoon']
+)
 
 # FACT TABLE
 
 fact_sale = FactTable(
     name='sale',
-    keyrefs=['room_id'],  # ,'time_id', 'member_id', 'product_id'
+    keyrefs=['room_id', 'time_id', 'member_id', 'product_id'],
     measures=['price'],
     # lookupatts=['price']
 )
 
 # PROGRAM
 
-# [dim_room.insert(row) for row in src_room]
+[dim_room.insert(row) for row in src_room]
 
 
 def main():
