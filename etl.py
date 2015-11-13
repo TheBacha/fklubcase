@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
 import getpass
-import datetime
-import calendar
-import sys
-import time
+import datetime as dt
+# import sys
+# import time
 import psycopg2  # postgresql
 
 import pygrametl
@@ -99,23 +98,16 @@ def GetMinMaxDate(rounded=True):
     min_s = '1996-10-28 12:21:23'
     max_s = '2008-01-07 12:19:39'
     fmt = '%Y-%m-%d %H:%M:%S'
-    min_t = time.strptime(min_s, fmt)
-    max_t = time.strptime(max_s, fmt)
+    min_dt = dt.datetime.strptime(min_s, fmt)
+    max_dt = dt.datetime.strptime(max_s, fmt)
     if(rounded):
-        # min_f = time.mktime(min_t)
-        # max_f = time.mktime(max_t)
-        min_f = calendar.timegm(min_t)
-        max_f = calendar.timegm(max_t)
-        qrt_f = 15*60.0  # 15 minutes
-        min_f -= min_f % qrt_f
-        max_f += qrt_f  # round up instead of down
-        max_f -= max_f % qrt_f
-        min_t = time.gmtime(min_f)
-        max_t = time.gmtime(max_f)
-    return min_t, max_t
+        qrt = dt.timedelta(minutes=15)
+        min_dt -= (min_dt - dt.datetime.min) % qrt
+        max_dt -= (max_dt - dt.datetime.min) % qrt - qrt
+    return min_dt, max_dt
 
 
-def TimeToRow(dt):
+def TimeToRow(datetime):
     """
            c <
           /\/    o    o    o    o
