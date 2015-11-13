@@ -13,10 +13,15 @@ from pygrametl.tables import Dimension, FactTable
 
 # CONFIGURATION
 
+VERBOSE = False
 db_dw = 'fklubdw'
 db_rw = 'fkluboltp'
 csv_dir = 'fklubdw/FKlubSourceData/'
 tables_names = ['member', 'time', 'product', 'room', 'sale']
+quarter = dt.timedelta(minutes=15)
+min_s = '1996-10-28 12:21:23'
+max_s = '2008-01-07 12:19:39'
+fmt = '%Y-%m-%d %H:%M:%S'
 
 username = getpass.getuser()
 print ('user='+username)
@@ -95,19 +100,15 @@ fact_sale = FactTable(
 
 
 def GetMinMaxDate(rounded=True):
-    min_s = '1996-10-28 12:21:23'
-    max_s = '2008-01-07 12:19:39'
-    fmt = '%Y-%m-%d %H:%M:%S'
     min_dt = dt.datetime.strptime(min_s, fmt)
     max_dt = dt.datetime.strptime(max_s, fmt)
     if(rounded):
-        qrt = dt.timedelta(minutes=15)
-        min_dt -= (min_dt - dt.datetime.min) % qrt
-        max_dt -= (max_dt - dt.datetime.min) % qrt - qrt
+        min_dt -= (min_dt - dt.datetime.min) % quarter
+        max_dt -= (max_dt - dt.datetime.min) % quarter - quarter  # round up
     return min_dt, max_dt
 
 
-def TimeToRow(datetime):
+def TimeToRow(t):
     """
            c <
           /\/    o    o    o    o
@@ -116,24 +117,61 @@ def TimeToRow(datetime):
     -~-~ `---/----/----/----/-------'  -~-~
     -~-~-~-~  -~-~  -~-~-~-~
     """
+    if VERBOSE: print('TimeToRow:', t)
+    q_h = t.minute / 15
+    assert 0 <= q_h < 4
+    is_spring = 1 < t.month < 8
+    day = dt.datetime.combine(t.date(), dt.time.min)
+    weekday = t.isoweekday()
+    row = {
+        'semester': ('F' if is_spring else 'E') + t.strftime('%y'),
+        'week': int(t.strftime('%W')),  # FIXME Calculate week of semester.
+        'day': weekday,
+        'hour': t.hour,
+        'quarter_hour': int(q_h),
+        'year': t.year,
+        'is_spring':  is_spring,
+        'is_weekend': 5 < weekday,
+        'is_morning': day.replace(hour=8) <= t <= day.replace(hour=12),
+        'is_afternoon': day.replace(hour=12, minute=30) <= t
+        <= day.replace(hour=16, minute=30),
+    }
+    if(VERBOSE): print(row)
+    return row
+
+
+def perdelta(start, end, delta):
+    curr = start
+    while curr < end:
+        yield curr
+        curr += delta
 
 
 def TimeGenerator():
-    raise "meh"
+    DEBUG = True
+    date_min, date_max = GetMinMaxDate(True)
+    num_rows = int((date_max - date_min) / quarter)
+    print('time rows:', num_rows)
+    start = date_min
+    delta = quarter if ~DEBUG else quarter * 2077
+    end = date_max if ~DEBUG else start + delta * 10
+    # TimeToRow(date_min)
+    t_start = dt.datetime.utcnow()
+    for tr in perdelta(start, end, delta):  # Takes just shy of 10 seconds
+        TimeToRow(tr)
+    TimeToRow(date_max)
+    t_stop = dt.datetime.utcnow()
+    print('Elapsed:', t_stop - t_start)
+    # row_list = [base - datetime.timedelta(days=x) for x in range(0, num_rows)]
 
 # LOAD DATA
 
-[dim_room.insert(row) for row in src_room]
+# [dim_room.insert(row) for row in src_room]
 
 
 def main():
-    print("main")
-    min_d, max_d = GetMinMaxDate(False)
-    print (min_d)
-    print (max_d)
-    min_r, max_r = GetMinMaxDate()
-    print (min_r)
-    print (max_r)
+    print("MAIN")
+    TimeGenerator()
 
 
 if __name__ == '__main__':
@@ -142,4 +180,4 @@ if __name__ == '__main__':
 conn_dw.commit()
 conn_dw.close()
 pgconn_dw.close()
-print("Done")
+print("DONE")
