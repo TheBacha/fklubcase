@@ -210,35 +210,32 @@ def TimeGenerator():
 """
 
 
+def IntToMoney(row, name):
+    row[name] = float(row[name]) / 100
+
+
 def main():
     print("MAIN")
     # LOAD DATA:
     # if not KEEP_TIME: TimeGenerator()
     [dim_room.insert(row) for row in src_room]
     for m in src_member:
-        m['is_active'] = int(m['active']) == 1
-        m['balance'] = float(m['balance']) / 100
-        dim_member.insert(m)
+        IntToMoney(m, 'balance')
+        dim_member.insert(m, {'is_active': 'active'})
     for p in src_product:
-        print('NEW PRODUCT')
-        print('product', p)
-        p['is_active'] = int(p['active']) == 1
-        p['price'] = float(p['price']) / 100
+        IntToMoney(p, 'price')
         if p['deactivatedate'] == '':
             p['deactivation_date'] = None
         else:
-            # SplitTimestamp(p, 'deactivatedate')
-            t = TimestampToDateTime(p['deactivatedate'])
-            tid = TimeIdFromDateTime(t)[0]
-            print(t, tid)
+            tid = TimeIdFromDateTime(TimestampToDateTime(p['deactivatedate']))[0]
             p.update({'time_id': tid})
             p['deactivation_date'] = dim_time.ensure(p, {'timestamp': 'deactivatedate'})
-            #p['deactivation_date'] = dim_time.ensure({'time_id':
-            #    TimeIdFromDateTime(TimestampToDateTime(p['deactivatedate']))[0]})
-        print('Product to insert:', p)
-        dim_product.insert(p, {'deactivation_date': 'deactivatedate'})
+        dim_product.insert(p, {'deactivation_date': 'deactivatedate', 'is_active': 'active'})
+
+    # inputdata = MergeJoiningSource(downloadlog, 'localfile', testresults, 'localfile')
     return
     for s in src_sale:
+        print('NEW SALE:', s)
         s['price'] = float(s['price']) / 100
         s['product_id'] = dim_product.lookup(s)
         s['room_id'] = dim_room.lookup(s)
