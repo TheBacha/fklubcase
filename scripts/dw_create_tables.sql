@@ -32,17 +32,6 @@ create type product_type as enum
   -- etc...
 );
 
-create table product
-(
-  product_id serial primary key
-  , type product_type not null default 'undefined' -- could just be a text field
-  --, price_range product_price_range not null -- (0: 0-10 1: 11-50, etc.) -- NEEDED?
-  , name text not null
-  , price money not null
-  , is_active bool not null
-  , deactivation_date date --not null -- should this be a foreign key to time dimension?
-);
-
 create table time
 (
   time_id serial primary key
@@ -60,6 +49,17 @@ create table time
   , event_flan bool not null -- attr. for day
   , is_morning bool not null -- attr. for day
   , is_afternoon bool not null -- attr. for day
+);
+
+create table product
+(
+  product_id serial primary key
+  , type product_type not null default 'undefined' -- could just be a text field
+  --, price_range product_price_range not null -- (0: 0-10 1: 11-50, etc.) -- NEEDED?
+  , name text not null
+  , price money not null
+  , is_active bool not null
+  , deactivation_date int references time(time_id)
 );
 
 

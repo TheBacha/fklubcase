@@ -15,8 +15,8 @@ from pygrametl.tables import Dimension, FactTable
 # CONFIGURATION
 
 DEBUG = False
-KEEP_TIME = True
-VERBOSE = False
+KEEP_TIME = False
+VERBOSE = not False
 
 db_dw = 'fklubdw'
 db_rw = 'fkluboltp'
@@ -25,7 +25,6 @@ tables_names = ['member', 'time', 'product', 'room', 'sale']
 quarter = dt.timedelta(minutes=15)
 min_s = '1996-10-28 12:21:23'
 max_s = '2008-01-07 12:19:39'
-fmt = '%Y-%m-%d %H:%M:%S'
 
 username = getpass.getuser()
 print ('user='+username)
@@ -70,6 +69,16 @@ for t in tables_names:
 # ROW EXPANDERS
 
 
+def TimeExpander(row, namemapping):
+    print('TimeExpander:', namemapping, row)
+    ts = pygrametl.getvalue(row, 'timestamp', namemapping)
+    date = TimestampToDateTime(ts)
+    timerow = TimeToRow(date)
+    row.update(timerow)
+    print('Expended row:', row)
+    # row[namemapping['timestamp']] = str(date)
+    return row
+
 # DIMENSIONS
 
 dim_room = Dimension(name='room', key='room_id',
@@ -88,9 +97,8 @@ dim_time = Dimension(name='time', key='time_id',
                 'is_spring', 'is_weekend', 'is_morning', 'is_afternoon',
                 # Ignored:
                 'is_holiday', 'event_flan'],
-    lookupatts=['semester', 'week', 'day', 'hour', 'quarter_hour', 'year',
-                'is_spring', 'is_weekend', 'is_morning', 'is_afternoon',
-                'is_holiday', 'event_flan'])
+    lookupatts=['time_id'],
+    rowexpander=TimeExpander)
 
 
 # FACT TABLE
@@ -106,9 +114,14 @@ fact_sale = FactTable(
 # PROGRAM
 
 
+def TimestampToDateTime(ts):
+    fmt = '%Y-%m-%d %H:%M:%S' if ts[5] == '-' and ts[8] == '-' else '%d-%m-%Y %H:%M:%S'
+    return dt.datetime.strptime(ts, fmt)
+
+
 def GetMinMaxDate(rounded=True):
-    min_dt = dt.datetime.strptime(min_s, fmt)
-    max_dt = dt.datetime.strptime(max_s, fmt)
+    min_dt = TimestampToDateTime(min_s)
+    max_dt = TimestampToDateTime(max_s)
     if(rounded):
         min_dt -= (min_dt - dt.datetime.min) % quarter
         max_dt -= (max_dt - dt.datetime.min) % quarter - quarter  # round up
@@ -121,6 +134,12 @@ def GetSemesterWeek(t):
     return weeknum
 
 
+def TimeIdFromDateTime(t):
+    q_h = int(t.minute / 15)
+    return (366 * (t.year - 1990) + t.timetuple().tm_yday)*24*4 \
+           + t.hour*4 + q_h, q_h
+
+
 def TimeToRow(t):
     """
            c <
@@ -131,17 +150,19 @@ def TimeToRow(t):
         -~-~-~-~  -~-~  -~-~-~-~
     """
     if VERBOSE: print('TimeToRow:', t)
-    q_h = t.minute / 15
+    # q_h = int(t.minute / 15)
+    time_id, q_h = TimeIdFromDateTime(t)
     assert 0 <= q_h < 4
     is_spring = 1 < t.month < 8
     day = dt.datetime.combine(t.date(), dt.time.min)
     weekday = t.isoweekday()
     row = {
+        'time_id': time_id,
         'semester': ('F' if is_spring else 'E') + t.strftime('%y'),
         'week': GetSemesterWeek(t),
         'day': weekday,
         'hour': t.hour,
-        'quarter_hour': int(q_h),
+        'quarter_hour': q_h,
         'year': t.year,
         'is_spring':  is_spring,
         'is_weekend': 5 < weekday,
@@ -156,6 +177,14 @@ def TimeToRow(t):
     return row
 
 
+"""
+def SplitTimestamp(row, col='timestamp'):
+    t = TimestampToDateTime(row[col])
+    print(t)
+    row.update(TimeToRow(t))
+"""
+
+
 def perdelta(start, end, delta):
     curr = start
     while curr < end:
@@ -163,6 +192,7 @@ def perdelta(start, end, delta):
         curr += delta
 
 
+"""
 def TimeGenerator():
     date_min, date_max = GetMinMaxDate(True)
     num_rows = int((date_max - date_min) / quarter) + 1
@@ -177,16 +207,44 @@ def TimeGenerator():
     dim_time.insert(TimeToRow(date_max))
     t_stop = dt.datetime.utcnow()
     print('Elapsed:', t_stop - t_start)
-
-# LOAD DATA
-
-# [dim_room.insert(row) for row in src_room]
+"""
 
 
 def main():
     print("MAIN")
-    if not KEEP_TIME:
-        TimeGenerator()
+    # LOAD DATA:
+    # if not KEEP_TIME: TimeGenerator()
+    [dim_room.insert(row) for row in src_room]
+    for m in src_member:
+        m['is_active'] = int(m['active']) == 1
+        m['balance'] = float(m['balance']) / 100
+        dim_member.insert(m)
+    for p in src_product:
+        print('NEW PRODUCT')
+        print('product', p)
+        p['is_active'] = int(p['active']) == 1
+        p['price'] = float(p['price']) / 100
+        if p['deactivatedate'] == '':
+            p['deactivation_date'] = None
+        else:
+            # SplitTimestamp(p, 'deactivatedate')
+            t = TimestampToDateTime(p['deactivatedate'])
+            tid = TimeIdFromDateTime(t)[0]
+            print(t, tid)
+            p.update({'time_id': tid})
+            p['deactivation_date'] = dim_time.ensure(p, {'timestamp': 'deactivatedate'})
+            #p['deactivation_date'] = dim_time.ensure({'time_id':
+            #    TimeIdFromDateTime(TimestampToDateTime(p['deactivatedate']))[0]})
+        print('Product to insert:', p)
+        dim_product.insert(p, {'deactivation_date': 'deactivatedate'})
+    return
+    for s in src_sale:
+        s['price'] = float(s['price']) / 100
+        s['product_id'] = dim_product.lookup(s)
+        s['room_id'] = dim_room.lookup(s)
+        s['member_id'] = dim_member.lookup(s)
+        s['time_id'] = dim_time.ensure(s)
+        fact_sale.insert(s)
 
 
 if __name__ == '__main__':
