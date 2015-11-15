@@ -4,6 +4,7 @@ import getpass
 import datetime as dt
 # import sys
 # import time
+from subprocess import call, check_call
 import psycopg2  # postgresql
 
 import pygrametl
@@ -13,7 +14,10 @@ from pygrametl.tables import Dimension, FactTable
 
 # CONFIGURATION
 
+DEBUG = False
+KEEP_TIME = True
 VERBOSE = False
+
 db_dw = 'fklubdw'
 db_rw = 'fkluboltp'
 csv_dir = 'fklubdw/FKlubSourceData/'
@@ -45,7 +49,8 @@ src_sem_group = LoadDataSource('SemesterGroups.txt')
 """
 pgconn_rw = psycopg2.connect(user=username, database=db_rw)
 conn_rw = pygrametl.ConnectionWrapper(pgconn_rw)
-conn_rw.execute('set search_path to pygrametlexa') """
+conn_rw.execute('set search_path to pygrametlexa')
+"""
 
 # pgconn_dw = psycopg2.connect("user='"+username+"' dbname='"+db_dw+"'")
 pgconn_dw = psycopg2.connect(user=username, database=db_dw)
@@ -53,41 +58,40 @@ conn_dw = pygrametl.ConnectionWrapper(pgconn_dw)
 conn_dw.setasdefault()
 # conn_dw.execute('set search_path to pygrametlexa')
 
+
 # TRUNCATE
 
-[conn_dw.execute("TRUNCATE TABLE "+t+" CASCADE;") for t in tables_names]
+# check_call(['psql', 'fklubdw', '-f', 'scripts/dw_create_tables.sql'])
+for t in tables_names:
+    if KEEP_TIME and t == 'time': continue
+    conn_dw.execute("TRUNCATE TABLE "+t+" CASCADE;")
+
 
 # ROW EXPANDERS
 
 
 # DIMENSIONS
 
-dim_room = Dimension(
-    name='room',
-    key='room_id',
-    attributes=['name', 'description']
-)
+dim_room = Dimension(name='room', key='room_id',
+    attributes=['name', 'description'])
 
-dim_member = Dimension(
-    name='member',
-    key='member_id',
-    attributes=['is_active', 'year', 'balance']
-)
+dim_member = Dimension(name='member', key='member_id',
+    attributes=['is_active', 'year', 'balance'])
 
-dim_product = Dimension(
-    name='product',
-    key='product_id',
-    attributes=['name', 'price', 'is_active', 'deactivation_date']  # 'type'
-)
+dim_product = Dimension(name='product', key='product_id',
+    attributes=['name', 'price', 'is_active', 'deactivation_date'])
+    # FIXME 'type' is missing from attributes
 
-dim_time = Dimension(
-    name='time',
-    key='time_id',
+# Approx. 28 MB.
+dim_time = Dimension(name='time', key='time_id',
     attributes=['semester', 'week', 'day', 'hour', 'quarter_hour', 'year',
                 'is_spring', 'is_weekend', 'is_morning', 'is_afternoon',
                 # Ignored:
-                'is_holiday', 'event_flan']
-)
+                'is_holiday', 'event_flan'],
+    lookupatts=['semester', 'week', 'day', 'hour', 'quarter_hour', 'year',
+                'is_spring', 'is_weekend', 'is_morning', 'is_afternoon',
+                'is_holiday', 'event_flan'])
+
 
 # FACT TABLE
 
@@ -97,6 +101,7 @@ fact_sale = FactTable(
     measures=['price'],
     # lookupatts=['price']
 )
+
 
 # PROGRAM
 
@@ -159,24 +164,19 @@ def perdelta(start, end, delta):
 
 
 def TimeGenerator():
-    DEBUG = True
     date_min, date_max = GetMinMaxDate(True)
-    num_rows = int((date_max - date_min) / quarter)
+    num_rows = int((date_max - date_min) / quarter) + 1
     print('time rows:', num_rows)
     start = date_min
     delta = quarter if not DEBUG else quarter * 2077
     end = date_max if not DEBUG else start + delta * 10
     # TimeToRow(date_min)
     t_start = dt.datetime.utcnow()
-    for tr in perdelta(start, end, delta):
-        # Takes just shy of 10 seconds to do TimeToRow.
-        # Takes just below 1 min. 30 for inserting as well.
-        # Takes up 2500 pages -> ~19,5MB
+    for tr in perdelta(start, end, delta):  # 1-2 min. to run.
         dim_time.insert(TimeToRow(tr))
     dim_time.insert(TimeToRow(date_max))
     t_stop = dt.datetime.utcnow()
     print('Elapsed:', t_stop - t_start)
-    # row_list = [base - datetime.timedelta(days=x) for x in range(0, num_rows)]
 
 # LOAD DATA
 
@@ -185,7 +185,8 @@ def TimeGenerator():
 
 def main():
     print("MAIN")
-    TimeGenerator()
+    if not KEEP_TIME:
+        TimeGenerator()
 
 
 if __name__ == '__main__':
