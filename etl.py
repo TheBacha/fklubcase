@@ -84,7 +84,9 @@ dim_time = Dimension(
     name='time',
     key='time_id',
     attributes=['semester', 'week', 'day', 'hour', 'quarter_hour', 'year',
-                'is_spring', 'is_weekend', 'is_morning', 'is_afternoon']
+                'is_spring', 'is_weekend', 'is_morning', 'is_afternoon',
+                # Ignored:
+                'is_holiday', 'event_flan']
 )
 
 # FACT TABLE
@@ -108,6 +110,12 @@ def GetMinMaxDate(rounded=True):
     return min_dt, max_dt
 
 
+def GetSemesterWeek(t):
+    weeknum = int(t.strftime('%W'))
+    # FIXME Calculate week of semester.
+    return weeknum
+
+
 def TimeToRow(t):
     """
            c <
@@ -115,7 +123,7 @@ def TimeToRow(t):
          /_    /\/) /\/) /\/) /\/)
        _[]/___/__/_/__/_/__/_/__/______
     -~-~ `---/----/----/----/-------'  -~-~
-    -~-~-~-~  -~-~  -~-~-~-~
+        -~-~-~-~  -~-~  -~-~-~-~
     """
     if VERBOSE: print('TimeToRow:', t)
     q_h = t.minute / 15
@@ -125,7 +133,7 @@ def TimeToRow(t):
     weekday = t.isoweekday()
     row = {
         'semester': ('F' if is_spring else 'E') + t.strftime('%y'),
-        'week': int(t.strftime('%W')),  # FIXME Calculate week of semester.
+        'week': GetSemesterWeek(t),
         'day': weekday,
         'hour': t.hour,
         'quarter_hour': int(q_h),
@@ -134,7 +142,10 @@ def TimeToRow(t):
         'is_weekend': 5 < weekday,
         'is_morning': day.replace(hour=8) <= t <= day.replace(hour=12),
         'is_afternoon': day.replace(hour=12, minute=30) <= t
-        <= day.replace(hour=16, minute=30),
+            <= day.replace(hour=16, minute=30),
+        # Dummy values:
+        'event_flan': False,
+        'is_holiday': False,
     }
     if(VERBOSE): print(row)
     return row
@@ -153,13 +164,16 @@ def TimeGenerator():
     num_rows = int((date_max - date_min) / quarter)
     print('time rows:', num_rows)
     start = date_min
-    delta = quarter if ~DEBUG else quarter * 2077
-    end = date_max if ~DEBUG else start + delta * 10
+    delta = quarter if not DEBUG else quarter * 2077
+    end = date_max if not DEBUG else start + delta * 10
     # TimeToRow(date_min)
     t_start = dt.datetime.utcnow()
-    for tr in perdelta(start, end, delta):  # Takes just shy of 10 seconds
-        TimeToRow(tr)
-    TimeToRow(date_max)
+    for tr in perdelta(start, end, delta):
+        # Takes just shy of 10 seconds to do TimeToRow.
+        # Takes just below 1 min. 30 for inserting as well.
+        # Takes up 2500 pages -> ~19,5MB
+        dim_time.insert(TimeToRow(tr))
+    dim_time.insert(TimeToRow(date_max))
     t_stop = dt.datetime.utcnow()
     print('Elapsed:', t_stop - t_start)
     # row_list = [base - datetime.timedelta(days=x) for x in range(0, num_rows)]

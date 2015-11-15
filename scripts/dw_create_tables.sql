@@ -46,7 +46,7 @@ create table product
 create table time
 (
   time_id serial primary key
-  , semester int not null -- semester id
+  , semester char(3) not null -- semester id
   , week smallint not null
   , day smallint not null
   , hour smallint not null
