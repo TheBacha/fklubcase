@@ -10,7 +10,7 @@ create schema public;
 
 create table member
 (
-  id serial primary key -- serial is implicit not null
+  member_id serial primary key -- serial is implicit not null
   , is_active bool not null
   , year smallint not null
   , balance money not null
@@ -18,7 +18,7 @@ create table member
 
 create table room
 (
-  id serial primary key
+  room_id serial primary key
   , name text not null
   , description text not null
 );
@@ -34,7 +34,7 @@ create type product_type as enum
 
 create table product
 (
-  id serial primary key
+  product_id serial primary key
   , type product_type not null default 'undefined' -- could just be a text field
   --, price_range product_price_range not null -- (0: 0-10 1: 11-50, etc.) -- NEEDED?
   , name text not null
@@ -45,7 +45,7 @@ create table product
 
 create table time
 (
-  id serial primary key
+  time_id serial primary key
   , semester int not null -- semester id
   , week smallint not null
   , day smallint not null
@@ -68,9 +68,9 @@ create table time
 create table sale
 (
   price money not null
-  , time_id int not null references time(id)
-  , product_id int not null references product(id)
-  , room_id int not null references room(id)
-  , member_id int not null references member(id)
+  , time_id int not null references time(time_id)
+  , product_id int not null references product(product_id)
+  , room_id int not null references room(room_id)
+  , member_id int not null references member(member_id)
 );
 
