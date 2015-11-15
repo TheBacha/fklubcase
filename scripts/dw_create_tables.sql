@@ -48,6 +48,7 @@ create table time
   time_id serial primary key
   , semester char(3) not null -- semester id
   , week smallint not null
+  -- SHOULD WE ADD? , week_sem smallint not null -- semester week, starting at 1
   , day smallint not null
   , hour smallint not null
   , quarter_hour smallint not null -- 0..3 (one for each quarter of an hour)
