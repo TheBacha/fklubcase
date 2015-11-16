@@ -2,19 +2,19 @@
 
 import getpass
 import datetime as dt
-from subprocess import call, check_call
+from subprocess import check_call
 import psycopg2  # postgresql
 
 import pygrametl
-from pygrametl.datasources import CSVSource, MergeJoiningSource, HashJoiningSource
+from pygrametl.datasources import CSVSource
 from pygrametl.tables import Dimension, FactTable
 
 
 # CONFIGURATION
 
-DEBUG = not False
-KEEP_TIME = False
+DEBUG = False
 VERBOSE = False
+DW_CREATE_TABLES = False
 
 db_dw = 'fklubdw'
 db_rw = 'fkluboltp'
@@ -58,9 +58,9 @@ conn_dw.setasdefault()
 
 # TRUNCATE
 
-# check_call(['psql', 'fklubdw', '-f', 'scripts/dw_create_tables.sql'])
+if DW_CREATE_TABLES:
+    check_call(['psql', 'fklubdw', '-f', 'scripts/dw_create_tables.sql'])
 for t in tables_names:
-    if KEEP_TIME and t == 'time': continue
     conn_dw.execute("TRUNCATE TABLE "+t+" CASCADE;")
 
 
@@ -68,14 +68,17 @@ for t in tables_names:
 
 
 def TimeExpander(row, namemapping):
-    if VERBOSE: print('TimeExpander:', namemapping, row)
+    if VERBOSE:
+        print('TimeExpander:', namemapping, row)
     ts = pygrametl.getvalue(row, 'timestamp', namemapping)
     date = TimestampToDateTime(ts)
     timerow = TimeToRow(date)
     row.update(timerow)
-    if VERBOSE: print('Expended row:', row)
+    if VERBOSE:
+        print('Expended row:', row)
     # row[namemapping['timestamp']] = str(date)
     return row
+
 
 # DIMENSIONS
 
@@ -87,9 +90,8 @@ dim_member = Dimension(name='member', key='member_id',
 
 dim_product = Dimension(name='product', key='product_id',
     attributes=['name', 'price', 'is_active', 'deactivation_date'])
-    # FIXME 'type' is missing from attributes
+# FIXME 'type' is missing from attributes
 
-# Approx. 28 MB.
 dim_time = Dimension(name='time', key='time_id',
     attributes=['semester', 'week', 'day', 'hour', 'quarter_hour', 'year',
                 'is_spring', 'is_weekend', 'is_morning', 'is_afternoon',
@@ -101,19 +103,17 @@ dim_time = Dimension(name='time', key='time_id',
 
 # FACT TABLE
 
-fact_sale = FactTable(
-    name='sale',
+fact_sale = FactTable(name='sale',
     keyrefs=['room_id', 'time_id', 'member_id', 'product_id'],
-    measures=['price'],
-    # lookupatts=['price']
-)
+    measures=['price'])
 
 
 # PROGRAM
 
 
 def TimestampToDateTime(ts):
-    fmt = '%Y-%m-%d %H:%M:%S' if ts[5] == '-' and ts[8] == '-' else '%d-%m-%Y %H:%M:%S'
+    fmt = '%Y-%m-%d %H:%M:%S' if ts[5] == '-' and ts[8] == '-' \
+        else '%d-%m-%Y %H:%M:%S'
     return dt.datetime.strptime(ts, fmt)
 
 
@@ -135,7 +135,7 @@ def GetSemesterWeek(t):
 def TimeIdFromDateTime(t):
     q_h = int(t.minute / 15)
     return (366 * (t.year - 1990) + t.timetuple().tm_yday)*24*4 \
-           + t.hour*4 + q_h, q_h
+        + t.hour*4 + q_h, q_h
 
 
 def TimeToRow(t):
@@ -147,8 +147,8 @@ def TimeToRow(t):
     -~-~ `---/----/----/----/-------'  -~-~
         -~-~-~-~  -~-~  -~-~-~-~
     """
-    if VERBOSE: print('TimeToRow:', t)
-    # q_h = int(t.minute / 15)
+    if VERBOSE:
+        print('TimeToRow:', t)
     time_id, q_h = TimeIdFromDateTime(t)
     assert 0 <= q_h < 4
     is_spring = 1 < t.month < 8
@@ -166,12 +166,13 @@ def TimeToRow(t):
         'is_weekend': 5 < weekday,
         'is_morning': day.replace(hour=8) <= t <= day.replace(hour=12),
         'is_afternoon': day.replace(hour=12, minute=30) <= t
-            <= day.replace(hour=16, minute=30),
+                     <= day.replace(hour=16, minute=30),
         # Dummy values:
         'event_flan': False,
         'is_holiday': False,
     }
-    if(VERBOSE): print(row)
+    if(VERBOSE):
+        print(row)
     return row
 
 
@@ -213,13 +214,13 @@ def IntToMoney(row, name):
 
 
 def main():
-    print("MAIN")
-    # LOAD DATA:
+    print("DATA LOADING")
     # if not KEEP_TIME: TimeGenerator()
 
     lut_room = {}
     lut_member = {}
     lut_product = {}
+    ddo, ddn = 'deactivatedate', 'deactivation_date'
 
     for r in src_room:
         rid = dim_room.insert(r)
@@ -230,35 +231,38 @@ def main():
         lut_member[m['id']] = str(mid)
     for p in src_product:
         IntToMoney(p, 'price')
-        if p['deactivatedate'] == '':
-            p['deactivation_date'] = None
+        if p[ddo] == '':
+            p[ddn] = None
         else:
-            tid = TimeIdFromDateTime(TimestampToDateTime(p['deactivatedate']))[0]
+            tid = TimeIdFromDateTime(TimestampToDateTime(p[ddo]))[0]
             p.update({'time_id': tid})
-            p['deactivation_date'] = dim_time.ensure(p, {'timestamp': 'deactivatedate'})
-        pid = dim_product.insert(p, {'deactivation_date': 'deactivatedate', 'is_active': 'active'})
+            p[ddn] = dim_time.ensure(p, {'timestamp': ddo})
+        pid = dim_product.insert(p, {ddn: ddo, 'is_active': 'active'})
         lut_product[p['id']] = str(pid)
 
     for s in src_sale:
-        # if VERBOSE:
         IntToMoney(s, 'price')
         try:
             s['room_id'] = lut_room[s['room_id']]
             s['member_id'] = lut_member[s['member_id']]
             s['product_id'] = lut_product[s['product_id']]
         except KeyError as e:
-            print('ERROR: Key not found:', e)
-            print('Sale:', s)
+            if VERBOSE or DEBUG:
+                print('ERROR: Key not found:', e)
+                print('Sale:', s)
             if DEBUG:
                 input("Press Enter to continue...")
-            print('Datum discarded, continuing...')
+                print('Datum discarded, continuing...')
             continue
+
         tid = TimeIdFromDateTime(TimestampToDateTime(s['timestamp']))[0]
         s.update({'time_id': tid})
         s['time_id'] = dim_time.ensure(s)
 
-        if VERBOSE: print('SALE TO INSERT:', s)
         fact_sale.insert(s)
+        if VERBOSE:
+            print('SALE INSERTED:', s)
+
 
 
 if __name__ == '__main__':
