@@ -34,11 +34,11 @@ def LoadDataSource(name):
     return CSVSource(open(csv_dir+name, 'r', 16384), delimiter='\t')
 
 src_member = LoadDataSource('Member.txt')
-src_payment = LoadDataSource('Payment.txt')
 src_product = LoadDataSource('Product.txt')
 src_room = LoadDataSource('Room.txt')
 src_sale = LoadDataSource('Sale.txt')
-src_sem_group = LoadDataSource('SemesterGroups.txt')
+# src_payment = LoadDataSource('Payment.txt')
+# src_sem_group = LoadDataSource('SemesterGroups.txt')
 
 
 # DATABASE CONNECTION
@@ -262,7 +262,6 @@ def main():
         fact_sale.insert(s)
         if VERBOSE:
             print('SALE INSERTED:', s)
-
 
 
 if __name__ == '__main__':
