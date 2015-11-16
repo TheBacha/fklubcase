@@ -2,21 +2,19 @@
 
 import getpass
 import datetime as dt
-# import sys
-# import time
 from subprocess import call, check_call
 import psycopg2  # postgresql
 
 import pygrametl
-from pygrametl.datasources import CSVSource  # , MergeJoiningSource
+from pygrametl.datasources import CSVSource, MergeJoiningSource, HashJoiningSource
 from pygrametl.tables import Dimension, FactTable
 
 
 # CONFIGURATION
 
-DEBUG = False
+DEBUG = not False
 KEEP_TIME = False
-VERBOSE = not False
+VERBOSE = False
 
 db_dw = 'fklubdw'
 db_rw = 'fkluboltp'
@@ -70,12 +68,12 @@ for t in tables_names:
 
 
 def TimeExpander(row, namemapping):
-    print('TimeExpander:', namemapping, row)
+    if VERBOSE: print('TimeExpander:', namemapping, row)
     ts = pygrametl.getvalue(row, 'timestamp', namemapping)
     date = TimestampToDateTime(ts)
     timerow = TimeToRow(date)
     row.update(timerow)
-    print('Expended row:', row)
+    if VERBOSE: print('Expended row:', row)
     # row[namemapping['timestamp']] = str(date)
     return row
 
@@ -218,10 +216,18 @@ def main():
     print("MAIN")
     # LOAD DATA:
     # if not KEEP_TIME: TimeGenerator()
-    [dim_room.insert(row) for row in src_room]
+
+    lut_room = {}
+    lut_member = {}
+    lut_product = {}
+
+    for r in src_room:
+        rid = dim_room.insert(r)
+        lut_room[r['id']] = str(rid)
     for m in src_member:
         IntToMoney(m, 'balance')
-        dim_member.insert(m, {'is_active': 'active'})
+        mid = dim_member.insert(m, {'is_active': 'active'})
+        lut_member[m['id']] = str(mid)
     for p in src_product:
         IntToMoney(p, 'price')
         if p['deactivatedate'] == '':
@@ -230,17 +236,28 @@ def main():
             tid = TimeIdFromDateTime(TimestampToDateTime(p['deactivatedate']))[0]
             p.update({'time_id': tid})
             p['deactivation_date'] = dim_time.ensure(p, {'timestamp': 'deactivatedate'})
-        dim_product.insert(p, {'deactivation_date': 'deactivatedate', 'is_active': 'active'})
+        pid = dim_product.insert(p, {'deactivation_date': 'deactivatedate', 'is_active': 'active'})
+        lut_product[p['id']] = str(pid)
 
-    # inputdata = MergeJoiningSource(downloadlog, 'localfile', testresults, 'localfile')
-    return
     for s in src_sale:
-        print('NEW SALE:', s)
-        s['price'] = float(s['price']) / 100
-        s['product_id'] = dim_product.lookup(s)
-        s['room_id'] = dim_room.lookup(s)
-        s['member_id'] = dim_member.lookup(s)
+        # if VERBOSE:
+        IntToMoney(s, 'price')
+        try:
+            s['room_id'] = lut_room[s['room_id']]
+            s['member_id'] = lut_member[s['member_id']]
+            s['product_id'] = lut_product[s['product_id']]
+        except KeyError as e:
+            print('ERROR: Key not found:', e)
+            print('Sale:', s)
+            if DEBUG:
+                input("Press Enter to continue...")
+            print('Datum discarded, continuing...')
+            continue
+        tid = TimeIdFromDateTime(TimestampToDateTime(s['timestamp']))[0]
+        s.update({'time_id': tid})
         s['time_id'] = dim_time.ensure(s)
+
+        if VERBOSE: print('SALE TO INSERT:', s)
         fact_sale.insert(s)
 
 
