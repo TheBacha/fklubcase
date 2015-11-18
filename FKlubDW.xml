@@ -34,16 +34,31 @@
     </Hierarchy>
   </Dimension>
 
-<!--
   <Dimension name="Time">
-    <Hierarchy hasAll="true" primaryKey="time_id">
+    <!-- FIXME hasAll true or false? -->
+    <Hierarchy hasAll="false" primaryKey="time_id">
       <Table name="time"/>
-      <Level name="" column="" uniqueMembers="true"/>
-      <Level name="" column="" uniqueMembers="true">
-        <Property name="" column="" type="Boolean"/>
+      <Level name="Semester" column="semester" uniqueMembers="true">
+        <Property name="Is Spring" column="is_spring" type="Boolean"/>
+        <Property name="Year" column="year" type="Numerical"/>
+      </Level>
+      <Level name="Week" column="week" uniqueMembers="false"/>
+      <Level name="Day" column="day" uniqueMembers="false">
+        <Property name="Is Weekend" column="is_weekend" type="Boolean"/>
+        <Property name="Is Holiday" column="is_holiday" type="Boolean"/>
+      </Level>
+      <Level name="Hour" column="hour" uniqueMembers="false">
+        <Property name="Is Morning" column="is_morning" type="Boolean"/>
+        <Property name="Is Afternoon" column="is_afternoon" type="Boolean"/>
+      </Level>
+      <Level name="Quarter of Hour" column="quarter_hour" uniqueMembers="false">
+        <Property name="Event: FLAN" column="event_flan" type="Boolean"/>
       </Level>
     </Hierarchy>
   </Dimension>
+
+<!-- TODO
+  Add cube/fact table
 -->
 
 </Schema>
