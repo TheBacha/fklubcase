@@ -6,7 +6,6 @@
   <Dimension name="Product">
     <Hierarchy hasAll="true" primaryKey="product_id">
       <Table name="product"/>
-      <Level name="" column="" uniqueMembers="true"/>
       <Level name="name" column="name" uniqueMembers="true">
         <Property name="Price" column="price" type="Money"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
@@ -15,13 +14,13 @@
     </Hierarchy>
   </Dimension>
 
-<!--
   <Dimension name="Member">
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
-      <Level name="" column="" uniqueMembers="true"/>
       <Level name="" column="" uniqueMembers="true">
-        <Property name="" column="" type="Boolean"/>
+        <Property name="Balance" column="balance" type="Money"/>
+        <Property name="Is Active" column="is_active" type="Boolean"/>
+        <Property name="Year of Enrollment" column="year" type="Numerical"/>
       </Level>
     </Hierarchy>
   </Dimension>
@@ -29,13 +28,13 @@
   <Dimension name="Room">
     <Hierarchy hasAll="true" primaryKey="room_id">
       <Table name="room"/>
-      <Level name="" column="" uniqueMembers="true"/>
-      <Level name="" column="" uniqueMembers="true">
-        <Property name="" column="" type="Boolean"/>
+      <Level name="Name" column="name" uniqueMembers="true">
+        <Property name="Description" column="description" type="String"/>
       </Level>
     </Hierarchy>
   </Dimension>
 
+<!--
   <Dimension name="Time">
     <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
