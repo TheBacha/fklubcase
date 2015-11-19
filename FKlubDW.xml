@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <Schema name="FKlubDW">
 
- <!-- Define your cube incl. its dimensions and measures here. See FoodMart.xml for an example and http://mondrian.pentaho.com/documentation/schema.php for documentation -->
-
-  <Dimension name="Product">
+  <Dimension name="Product" foreignKey="product_id">
     <Hierarchy hasAll="true" primaryKey="product_id">
       <Table name="product"/>
       <Level name="name" column="name" uniqueMembers="true">
@@ -14,18 +12,18 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Member">
+  <Dimension name="Member" foreignKey="member_id">
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
       <Level name="Individual" column="member_id" uniqueMembers="true">
         <Property name="Balance" column="balance" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
-        <Property name="Year of Enrollment" column="year" type="Numeric"/>
+        <Property name="Year of Enrollment" column="year" type="Integer"/>
       </Level>
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Room">
+  <Dimension name="Room" foreignKey="room_id">
     <Hierarchy hasAll="true" primaryKey="room_id">
       <Table name="room"/>
       <Level name="Name" column="name" uniqueMembers="true">
@@ -34,13 +32,12 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Time">
-    <!-- FIXME hasAll true or false? -->
+  <Dimension name="Time" foreignKey="time_id" type="TimeDimension">
     <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
       <Level name="Semester" column="semester" uniqueMembers="true">
         <Property name="Is Spring" column="is_spring" type="Boolean"/>
-        <Property name="Year" column="year" type="Numeric"/>
+        <Property name="Year" column="year" type="Integer"/>
       </Level>
       <Level name="Week" column="week" uniqueMembers="false"/>
       <Level name="Day" column="day" uniqueMembers="false">
@@ -58,16 +55,14 @@
   </Dimension>
 
 
-<Cube name="Sales"> <!-- defaultMeasure="Unit Sales" -->
+<Cube name="Sales" defaultMeasure="Total Sales">
   <Table name="sale"/>
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
   <DimensionUsage name="Time"    source="Time"    foreignKey="time_id"/>
   <DimensionUsage name="Member"  source="Member"  foreignKey="member_id"/>
 
-  <Measure name="Total Sales" column="price" aggregator="sum"
-    formatString="#,###.00"/>
-
+  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
 </Cube>
 
 </Schema>
