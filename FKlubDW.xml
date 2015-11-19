@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <Schema name="FKlubDW">
 
-
 <Cube name="Sales">
 
   <Table name="sale"/>
@@ -16,7 +15,7 @@
       -->
       <Table name="product"/>
       <Level name="Product" column="product_id" nameColumn="name"  uniqueMembers="true">
-        <Property name="Price" column="price" type="Numeric"/>
+        <Property name="Price"     column="price"     type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
         <!--
         <Property name="Deactivation Date" column="deactivation_date" type="Integer"/>
@@ -38,7 +37,7 @@
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
       <Level name="Member Id" column="member_id" uniqueMembers="true" type="Integer">
-        <Property name="Balance" column="balance" type="Numeric"/>
+        <Property name="Balance"   column="balance"   type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
         <Property name="Year of Enrollment" column="year" type="Integer"/>
       </Level>
@@ -73,23 +72,23 @@
         <Property name="Year" column="year" type="Integer"/>
       </Level>
       <Level name="Week" column="week" type="Integer" uniqueMembers="false"/>
-      <Level name="Day" column="day" type="Integer" uniqueMembers="false">
+      <Level name="Day"  column="day"  type="Integer" uniqueMembers="false">
         <Property name="Is Weekend" column="is_weekend" type="Boolean"/>
         <Property name="Is Holiday" column="is_holiday" type="Boolean"/>
       </Level>
       <Level name="Hour" column="hour" type="Integer" uniqueMembers="false">
-        <Property name="Is Morning" column="is_morning" type="Boolean"/>
+        <Property name="Is Morning"   column="is_morning"   type="Boolean"/>
         <Property name="Is Afternoon" column="is_afternoon" type="Boolean"/>
       </Level>
-      <Level name="Quarter of Hour" column="quarter_hour" type="Integer" uniqueMembers="false">
-        <Property name="Event: FLAN" column="event_flan" type="Boolean"/>
+      <Level name="Quarter of Hour"  column="quarter_hour" type="Integer" uniqueMembers="false">
+        <Property name="Event: FLAN" column="event_flan"   type="Boolean"/>
       </Level>
     </Hierarchy>
   </Dimension>
 
-  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,##0.00"/>
-  <Measure name="Unit Sales" column="price" aggregator="count" formatString="#,##0"/>
-  <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,##0.00"/>
+  <Measure name="Total Sales"   column="price" aggregator="sum"   formatString="#,##0.00"/>
+  <Measure name="Unit Sales"    column="price" aggregator="count" formatString="#,##0"   />
+  <Measure name="Average Sales" column="price" aggregator="avg"   formatString="#,##0.00"/>
 
   <!--
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
