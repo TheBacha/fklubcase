@@ -13,7 +13,7 @@ create table member
   member_id serial primary key -- serial is implicit not null
   , is_active bool not null
   , year smallint not null
-  , balance money not null
+  , balance numeric not null
 );
 
 create table room
@@ -57,7 +57,7 @@ create table product
   , type product_type not null default 'undefined' -- could just be a text field
   --, price_range product_price_range not null -- (0: 0-10 1: 11-50, etc.) -- NEEDED?
   , name text not null
-  , price money not null
+  , price numeric not null
   , is_active bool not null
   , deactivation_date int references time(time_id)
 );
@@ -68,7 +68,7 @@ create table product
 
 create table sale
 (
-  price money not null
+  price numeric not null
   , time_id int not null references time(time_id)
   , product_id int not null references product(product_id)
   , room_id int not null references room(room_id)
