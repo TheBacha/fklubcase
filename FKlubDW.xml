@@ -70,12 +70,15 @@
 
 <Cube name="Sales" defaultMeasure="Total Sales">
   <Table name="sale"/>
-  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00">
-  	<MeasureExpression>
-  		<SQL dialect="postgres">
+  <Measure name="Total Sales" aggregator="sum" formatString="#,###.00">
+    <MeasureExpression>
+      <SQL dialect="generic">
+price
+      </SQL>
+      <SQL dialect="postgres">
 price::money::numeric::float8
       </SQL>
-  	</MeasureExpression>
+    </MeasureExpression>
   </Measure>
 
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
