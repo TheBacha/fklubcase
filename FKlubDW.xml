@@ -12,7 +12,7 @@
         <Table name="product"/>
         <Table name="time"/>
       </Join>
-      <Level name="name" column="name" table="product" uniqueMembers="true">
+      <Level name="name" column="product_id" nameColumn="name" table="product" uniqueMembers="true">
         <Property name="Price" column="price" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
         <!--
@@ -43,7 +43,7 @@
   <Dimension name="Room" foreignKey="room_id">
     <Hierarchy hasAll="true" primaryKey="room_id">
       <Table name="room"/>
-      <Level name="Name" column="name" uniqueMembers="true">
+      <Level name="Room" column="room_id" nameColumn="name" uniqueMembers="true">
         <Property name="Description" column="description" type="String"/>
       </Level>
     </Hierarchy>
@@ -71,9 +71,9 @@
     </Hierarchy>
   </Dimension>
 
-  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
-  <Measure name="Unit Sales" column="price" aggregator="count" formatString="#,###"/>
-  <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,###.00"/>
+  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,##0.00"/>
+  <Measure name="Unit Sales" column="price" aggregator="count" formatString="#,##0"/>
+  <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,##0.00"/>
 
   <!--
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
