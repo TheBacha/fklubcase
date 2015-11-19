@@ -54,7 +54,8 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Time" type="TimeDimension" foreignKey="time_id">
+  <Dimension name="Time" foreignKey="time_id">
+    <!--
     <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
       <Level name="Year" column="year" type="Integer" levelType="TimeYears"/>
@@ -64,6 +65,7 @@
         <Property name="Is Holiday" column="is_holiday" type="Boolean"/>
       </Level>
     </Hierarchy>
+    -->
     <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
       <Level name="Semester" column="semester" type="String" uniqueMembers="true">
