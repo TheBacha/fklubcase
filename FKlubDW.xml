@@ -1,18 +1,6 @@
 <?xml version="1.0"?>
 <Schema name="FKlubDW">
 
-  <Dimension name="Product">
-    <Hierarchy hasAll="true" primaryKey="product_id">
-      <Table name="product"/>
-      <Level name="name" column="name" uniqueMembers="true">
-        <Property name="Price" column="price" type="Numeric"/>
-        <Property name="Is Active" column="is_active" type="Boolean"/>
-        <Property name="Deactivation Date" column="deactivation_date" type="Integer"/>
-      </Level>
-    </Hierarchy>
-  </Dimension>
-  <!-- FIXME deativation_date is a foreign key to time dim. (time_id) -->
-
   <Dimension name="Member">
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
@@ -58,12 +46,27 @@
 
 <Cube name="Sales" defaultMeasure="Total Sales">
   <Table name="sale"/>
+  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
+
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
+  <!--
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
+  -->
   <DimensionUsage name="Time"    source="Time"    foreignKey="time_id"/>
   <DimensionUsage name="Member"  source="Member"  foreignKey="member_id"/>
 
-  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
+  <Dimension name="Product">
+    <Hierarchy hasAll="true" primaryKey="product_id">
+      <Table name="product"/>
+      <Level name="name" column="name" uniqueMembers="true">
+        <Property name="Price" column="price" type="Numeric"/>
+        <Property name="Is Active" column="is_active" type="Boolean"/>
+        <Property name="Deactivation Date" column="deactivation_date" type="Integer"/>
+      </Level>
+    </Hierarchy>
+  </Dimension>
+  <!-- FIXME deativation_date is a foreign key to time dim. (time_id) -->
+
 </Cube>
 
 </Schema>
