@@ -1,7 +1,12 @@
 <?xml version="1.0"?>
 <Schema name="FKlubDW">
 
-  <Dimension name="Product">
+
+<Cube name="Sales">
+
+  <Table name="sale"/>
+
+  <Dimension name="Product" foreignKey="product_id">
     <Hierarchy hasAll="true" primaryKey="product_id">
       <Join leftKey="deactivation_date" rightKey="time_id">
         <Table name="product"/>
@@ -24,7 +29,7 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Member">
+  <Dimension name="Member" foreignKey="member_id">
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
       <Level name="Member Id" column="member_id" uniqueMembers="true" type="Integer">
@@ -35,7 +40,7 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Room">
+  <Dimension name="Room" foreignKey="room_id">
     <Hierarchy hasAll="true" primaryKey="room_id">
       <Table name="room"/>
       <Level name="Name" column="name" uniqueMembers="true">
@@ -44,7 +49,7 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Time">
+  <Dimension name="Time" foreignKey="time_id">
     <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
       <Level name="Semester" column="semester" uniqueMembers="true">
@@ -66,17 +71,16 @@
     </Hierarchy>
   </Dimension>
 
-
-<Cube name="Sales">
-  <Table name="sale"/>
   <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
   <Measure name="Unit Sales" column="price" aggregator="count" formatString="#,###"/>
   <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,###.00"/>
 
+  <!--
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
   <DimensionUsage name="Time"    source="Time"    foreignKey="time_id"/>
   <DimensionUsage name="Member"  source="Member"  foreignKey="member_id"/>
+  -->
 
 </Cube>
 
