@@ -12,13 +12,14 @@
         <Table name="product"/>
         <Table name="time"/>
       </Join>
-      <Level name="name" column="product_id" nameColumn="name" table="product" uniqueMembers="true">
+      <Level name="Product" column="product_id" nameColumn="name" table="product" uniqueMembers="true">
         <Property name="Price" column="price" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
         <!--
         <Property name="Deactivation Date" column="deactivation_date" type="Integer"/>
         -->
       </Level>
+      <!--
       <Level name="Deactivation Date" column="time_id" table="time">
         <Property name="Year" column="year" type="Integer" />
         <Property name="Week" column="week" type="Integer" />
@@ -26,6 +27,7 @@
         <Property name="Is Weekend" column="is_weekend" type="Boolean"/>
         <Property name="Is Holiday" column="is_holiday" type="Boolean"/>
       </Level>
+      -->
     </Hierarchy>
   </Dimension>
 
