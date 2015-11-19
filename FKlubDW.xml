@@ -70,6 +70,7 @@
 <Cube name="Sales">
   <Table name="sale"/>
   <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
+  <Measure name="Unit Sales" column="price" aggregator="count" formatString="#,###"/>
   <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,###.00"/>
 
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
