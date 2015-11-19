@@ -57,7 +57,7 @@
   <Dimension name="Time" foreignKey="time_id">
     <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
-      <Level name="Semester" column="semester" uniqueMembers="true">
+      <Level name="Semester" column="semester" type="String" uniqueMembers="true">
         <Property name="Is Spring" column="is_spring" type="Boolean"/>
         <Property name="Year" column="year" type="Integer"/>
       </Level>
