@@ -7,7 +7,7 @@
   <Table name="sale"/>
 
   <Dimension name="Product" foreignKey="product_id">
-    <Hierarchy hasAll="true" primaryKey="product_id" primaryKeyTable="product">
+    <Hierarchy hasAll="true" primaryKey="product_id">
       <!--
       <Join leftKey="deactivation_date" rightKey="time_id">
         <Table name="product"/>
@@ -15,7 +15,7 @@
       </Join>
       -->
       <Table name="product"/>
-      <Level name="Product" column="product_id" nameColumn="name" table="product" uniqueMembers="true">
+      <Level name="Product" column="product_id" nameColumn="name"  uniqueMembers="true">
         <Property name="Price" column="price" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
         <!--
