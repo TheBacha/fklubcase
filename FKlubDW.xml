@@ -54,15 +54,24 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Time" foreignKey="time_id">
+  <Dimension name="Time" type="TimeDimension" foreignKey="time_id">
+    <Hierarchy hasAll="true" primaryKey="time_id">
+      <Table name="time"/>
+      <Level name="Year" column="year" type="Integer" levelType="TimeYears"/>
+      <Level name="Week" column="week" type="Integer" levelType="TimeWeeks" uniqueMembers="false"/>
+      <Level name="Day" column="day" type="Integer" levelType="TimeDays" uniqueMembers="false">
+        <Property name="Is Weekend" column="is_weekend" type="Boolean"/>
+        <Property name="Is Holiday" column="is_holiday" type="Boolean"/>
+      </Level>
+    </Hierarchy>
     <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
       <Level name="Semester" column="semester" type="String" uniqueMembers="true">
         <Property name="Is Spring" column="is_spring" type="Boolean"/>
         <Property name="Year" column="year" type="Integer"/>
       </Level>
-      <Level name="Week" column="week" type="Integer" levelType="TimeWeeks" uniqueMembers="false"/>
-      <Level name="Day" column="day" type="Integer" levelType="TimeDays" uniqueMembers="false">
+      <Level name="Week" column="week" type="Integer" uniqueMembers="false"/>
+      <Level name="Day" column="day" type="Integer" uniqueMembers="false">
         <Property name="Is Weekend" column="is_weekend" type="Boolean"/>
         <Property name="Is Holiday" column="is_holiday" type="Boolean"/>
       </Level>
