@@ -8,10 +8,13 @@
 
   <Dimension name="Product" foreignKey="product_id">
     <Hierarchy hasAll="true" primaryKey="product_id" primaryKeyTable="product">
+      <!--
       <Join leftKey="deactivation_date" rightKey="time_id">
         <Table name="product"/>
         <Table name="time"/>
       </Join>
+      -->
+      <Table name="product"/>
       <Level name="Product" column="product_id" nameColumn="name" table="product" uniqueMembers="true">
         <Property name="Price" column="price" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
