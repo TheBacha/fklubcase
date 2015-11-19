@@ -49,11 +49,13 @@
   <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
 
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
+  <!--
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
+  -->
   <DimensionUsage name="Time"    source="Time"    foreignKey="time_id"/>
   <DimensionUsage name="Member"  source="Member"  foreignKey="member_id"/>
 
-  <Dimension name="Product">
+  <Dimension name="Product" foreignKey="product_id">
     <Hierarchy hasAll="true" primaryKey="product_id">
       <Table name="product"/>
       <Level name="name" column="name" uniqueMembers="true">
