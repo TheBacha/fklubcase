@@ -7,7 +7,7 @@
   <Table name="sale"/>
 
   <Dimension name="Product" foreignKey="product_id">
-    <Hierarchy hasAll="true" primaryKey="product_id">
+    <Hierarchy hasAll="true" primaryKey="product_id" primaryKeyTable="product">
       <Join leftKey="deactivation_date" rightKey="time_id">
         <Table name="product"/>
         <Table name="time"/>
