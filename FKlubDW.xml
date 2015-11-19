@@ -74,9 +74,7 @@
   <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,###.00"/>
 
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
-  <!--
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
-  -->
   <DimensionUsage name="Time"    source="Time"    foreignKey="time_id"/>
   <DimensionUsage name="Member"  source="Member"  foreignKey="member_id"/>
 
