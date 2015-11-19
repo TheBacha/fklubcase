@@ -7,7 +7,8 @@
       <Level name="name" column="name" uniqueMembers="true">
         <Property name="Price" column="price" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
-        <Property name="Deactivation Date" column="deactivation_date" type="Date"/>
+        <!-- FIXME deativation_date is a foreign key to time dim. (time_id) -->
+        <Property name="Deactivation Date" column="deactivation_date" type="Integer"/>
       </Level>
     </Hierarchy>
   </Dimension>
@@ -15,7 +16,7 @@
   <Dimension name="Member" foreignKey="member_id">
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
-      <Level name="Individual" column="member_id" uniqueMembers="true">
+      <Level name="Member Id" column="member_id" uniqueMembers="true" type="Integer">
         <Property name="Balance" column="balance" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
         <Property name="Year of Enrollment" column="year" type="Integer"/>
