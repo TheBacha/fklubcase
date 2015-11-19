@@ -12,7 +12,7 @@ create table member
 (
   member_id serial primary key -- serial is implicit not null
   , is_active bool not null
-  , year smallint not null
+  , year int not null
   , balance numeric not null
 );
 
@@ -36,13 +36,13 @@ create table time
 (
   time_id serial primary key
   , semester char(3) not null -- semester id
-  , week smallint not null
-  -- SHOULD WE ADD? , week_sem smallint not null -- semester week, starting at 1
-  , day smallint not null
-  , hour smallint not null
-  , quarter_hour smallint not null -- 0..3 (one for each quarter of an hour)
+  , week int not null
+  -- SHOULD WE ADD? , week_sem int not null -- semester week, starting at 1
+  , day int not null
+  , hour int not null
+  , quarter_hour int not null -- 0..3 (one for each quarter of an hour)
   -- ATTRIBUTES
-  , year smallint not null -- attr. for semester
+  , year int not null -- attr. for semester
   , is_spring bool not null -- attr. for semester
   , is_holiday bool not null -- attr. for day
   , is_weekend bool not null -- attr. for day
