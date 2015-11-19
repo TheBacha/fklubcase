@@ -70,7 +70,13 @@
 
 <Cube name="Sales" defaultMeasure="Total Sales">
   <Table name="sale"/>
-  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
+  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00">
+  	<MeasureExpression>
+  		<SQL dialect="postgres">
+price::money::numeric::float8
+      </SQL>
+  	</MeasureExpression>
+  </Measure>
 
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
