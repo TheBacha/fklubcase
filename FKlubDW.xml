@@ -67,7 +67,7 @@
   </Dimension>
 
 
-<Cube name="Sales" defaultMeasure="Total Sales">
+<Cube name="Sales">
   <Table name="sale"/>
   <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
   <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,###.00"/>
