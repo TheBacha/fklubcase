@@ -12,19 +12,19 @@
         <Table name="product"/>
         <Table name="time"/>
       </Join>
-      <Level name="name" column="name" uniqueMembers="true">
-        <Property name="Price" column="price" type="Numeric"/>
-        <Property name="Is Active" column="is_active" type="Boolean"/>
+      <Level name="name" column="name" table="product" uniqueMembers="true">
+        <Property name="Price" column="price" table="product" type="Numeric"/>
+        <Property name="Is Active" column="is_active" table="product" type="Boolean"/>
         <!--
         <Property name="Deactivation Date" column="deactivation_date" type="Integer"/>
         -->
       </Level>
-      <Level name="Deactivation Date" column="deactivation_date">
-        <Property name="Year" column="year" type="Integer" />
-        <Property name="Week" column="week" type="Integer" />
-        <Property name="Day" column="day" type="Integer" />
-        <Property name="Is Weekend" column="is_weekend" type="Boolean"/>
-        <Property name="Is Holiday" column="is_holiday" type="Boolean"/>
+      <Level name="Deactivation Date" column="deactivation_date" table="time">
+        <Property name="Year" column="year" table="time" type="Integer" />
+        <Property name="Week" column="week" table="time" type="Integer" />
+        <Property name="Day" column="day" table="time" type="Integer" />
+        <Property name="Is Weekend" column="is_weekend" table="time" type="Boolean"/>
+        <Property name="Is Holiday" column="is_holiday" table="time" type="Boolean"/>
       </Level>
     </Hierarchy>
   </Dimension>
