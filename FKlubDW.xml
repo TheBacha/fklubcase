@@ -7,7 +7,7 @@
     <Hierarchy hasAll="true" primaryKey="product_id">
       <Table name="product"/>
       <Level name="name" column="name" uniqueMembers="true">
-        <Property name="Price" column="price" type="Money"/>
+        <Property name="Price" column="price" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
         <Property name="Deactivation Date" column="deactivation_date" type="Date"/>
       </Level>
@@ -18,9 +18,9 @@
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
       <Level name="" column="" uniqueMembers="true">
-        <Property name="Balance" column="balance" type="Money"/>
+        <Property name="Balance" column="balance" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
-        <Property name="Year of Enrollment" column="year" type="Numerical"/>
+        <Property name="Year of Enrollment" column="year" type="Numeric"/>
       </Level>
     </Hierarchy>
   </Dimension>
@@ -40,7 +40,7 @@
       <Table name="time"/>
       <Level name="Semester" column="semester" uniqueMembers="true">
         <Property name="Is Spring" column="is_spring" type="Boolean"/>
-        <Property name="Year" column="year" type="Numerical"/>
+        <Property name="Year" column="year" type="Numeric"/>
       </Level>
       <Level name="Week" column="week" uniqueMembers="false"/>
       <Level name="Day" column="day" uniqueMembers="false">
@@ -57,14 +57,17 @@
     </Hierarchy>
   </Dimension>
 
-<!-- TODO
-  Add cube/fact table
--->
 
 <Cube name="Sales"> <!-- defaultMeasure="Unit Sales" -->
-  <Table name="sale">
+  <Table name="sale"/>
+  <DimensionUsage name="Room" source="Room" foreignKey="room_id"/>
+  <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
+  <DimensionUsage name="Time" source="Time" foreignKey="time_id"/>
+  <DimensionUsage name="Member" source="Member" foreignKey="member_id"/>
 
-  </Table>
+  <Measure name="Total Sales" column="price" aggregator="sum"
+    formatString="#,###.00"/>
+
 </Cube>
 
 </Schema>
