@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <Schema name="FKlubDW">
 
-  <!--
   <Dimension name="Product" foreignKey="product_id">
     <Hierarchy hasAll="true" primaryKey="product_id">
       <Table name="product"/>
@@ -12,10 +11,9 @@
       </Level>
     </Hierarchy>
   </Dimension>
-  -->
   <!-- FIXME deativation_date is a foreign key to time dim. (time_id) -->
 
-  <Dimension name="Member" foreignKey="member_id">
+  <Dimension name="Member">
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
       <Level name="Member Id" column="member_id" uniqueMembers="true" type="Integer">
@@ -26,7 +24,7 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Room" foreignKey="room_id">
+  <Dimension name="Room">
     <Hierarchy hasAll="true" primaryKey="room_id">
       <Table name="room"/>
       <Level name="Name" column="name" uniqueMembers="true">
@@ -35,7 +33,7 @@
     </Hierarchy>
   </Dimension>
 
-  <Dimension name="Time" foreignKey="time_id" type="TimeDimension">
+  <Dimension name="Time">
     <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
       <Level name="Semester" column="semester" uniqueMembers="true">
@@ -61,9 +59,7 @@
 <Cube name="Sales" defaultMeasure="Total Sales">
   <Table name="sale"/>
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
-  <!--
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
-  -->
   <DimensionUsage name="Time"    source="Time"    foreignKey="time_id"/>
   <DimensionUsage name="Member"  source="Member"  foreignKey="member_id"/>
 
