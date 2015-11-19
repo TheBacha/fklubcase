@@ -61,4 +61,10 @@
   Add cube/fact table
 -->
 
+<Cube name="Sales"> <!-- defaultMeasure="Unit Sales" -->
+  <Table name="sale">
+
+  </Table>
+</Cube>
+
 </Schema>
