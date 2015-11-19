@@ -17,7 +17,7 @@
   <Dimension name="Member">
     <Hierarchy hasAll="true" primaryKey="member_id">
       <Table name="member"/>
-      <Level name="" column="" uniqueMembers="true">
+      <Level name="Individual" column="member_id" uniqueMembers="true">
         <Property name="Balance" column="balance" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
         <Property name="Year of Enrollment" column="year" type="Numeric"/>
@@ -36,7 +36,7 @@
 
   <Dimension name="Time">
     <!-- FIXME hasAll true or false? -->
-    <Hierarchy hasAll="false" primaryKey="time_id">
+    <Hierarchy hasAll="true" primaryKey="time_id">
       <Table name="time"/>
       <Level name="Semester" column="semester" uniqueMembers="true">
         <Property name="Is Spring" column="is_spring" type="Boolean"/>
@@ -60,10 +60,10 @@
 
 <Cube name="Sales"> <!-- defaultMeasure="Unit Sales" -->
   <Table name="sale"/>
-  <DimensionUsage name="Room" source="Room" foreignKey="room_id"/>
+  <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
-  <DimensionUsage name="Time" source="Time" foreignKey="time_id"/>
-  <DimensionUsage name="Member" source="Member" foreignKey="member_id"/>
+  <DimensionUsage name="Time"    source="Time"    foreignKey="time_id"/>
+  <DimensionUsage name="Member"  source="Member"  foreignKey="member_id"/>
 
   <Measure name="Total Sales" column="price" aggregator="sum"
     formatString="#,###.00"/>
