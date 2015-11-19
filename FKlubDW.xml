@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Schema name="FKlubDW">
 
-  <Dimension name="Product" foreignKey="product_id">
+  <Dimension name="Product">
     <Hierarchy hasAll="true" primaryKey="product_id">
       <Table name="product"/>
       <Level name="name" column="name" uniqueMembers="true">
