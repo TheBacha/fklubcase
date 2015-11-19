@@ -57,11 +57,23 @@
 
   <Dimension name="Product" foreignKey="product_id">
     <Hierarchy hasAll="true" primaryKey="product_id">
-      <Table name="product"/>
+      <Join leftKey="deactivation_date" rightKey="time_id">
+        <Table name="product"/>
+        <Table name="time"/>
+      </Join>
       <Level name="name" column="name" uniqueMembers="true">
         <Property name="Price" column="price" type="Numeric"/>
         <Property name="Is Active" column="is_active" type="Boolean"/>
+        <!--
         <Property name="Deactivation Date" column="deactivation_date" type="Integer"/>
+        -->
+      </Level>
+      <Level name="Deactivation Date" column="deactivation_date">
+        <Property name="Year" column="year" type="Integer" />
+        <Property name="Week" column="week" type="Integer" />
+        <Property name="Day" column="day" type="Integer" />
+        <Property name="Is Weekend" column="is_weekend" type="Boolean"/>
+        <Property name="Is Holiday" column="is_holiday" type="Boolean"/>
       </Level>
     </Hierarchy>
   </Dimension>
