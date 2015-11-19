@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <Schema name="FKlubDW">
 
+<Cube name="Sales">
+  <Table name="sale"/>
+  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
+  <Measure name="Unit Sales" column="price" aggregator="count" formatString="#,###"/>
+  <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,###.00"/>
+
   <Dimension name="Product">
     <Hierarchy hasAll="true" primaryKey="product_id">
       <Join leftKey="deactivation_date" rightKey="time_id">
@@ -66,18 +72,12 @@
     </Hierarchy>
   </Dimension>
 
-
-<Cube name="Sales">
-  <Table name="sale"/>
-  <Measure name="Total Sales" column="price" aggregator="sum" formatString="#,###.00"/>
-  <Measure name="Unit Sales" column="price" aggregator="count" formatString="#,###"/>
-  <Measure name="Average Sales" column="price" aggregator="avg" formatString="#,###.00"/>
-
+  <!--
   <DimensionUsage name="Room"    source="Room"    foreignKey="room_id"/>
   <DimensionUsage name="Product" source="Product" foreignKey="product_id"/>
   <DimensionUsage name="Time"    source="Time"    foreignKey="time_id"/>
   <DimensionUsage name="Member"  source="Member"  foreignKey="member_id"/>
-
+  -->
 </Cube>
 
 </Schema>
